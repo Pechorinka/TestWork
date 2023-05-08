@@ -6,31 +6,14 @@
 //
 
 import UIKit
-import Foundation
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Создаем окно
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.backgroundColor = UIColor.white
-        
-        // Создаем корневой контроллер
-        let viewController = TabViewController()
-        let navigationController = UINavigationController(rootViewController: viewController)
-        
-        // Устанавливаем корневой контроллер
-        window?.rootViewController = navigationController
-        window?.makeKeyAndVisible()
-        
         return true
     }
-
-
-    // MARK: UISceneSession Lifecycle
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
 

@@ -8,11 +8,11 @@
 import Foundation
 import UIKit
 
-class Favorite {
+class Favorite: Codable {
   let query: String
-  let image: UIImage
+  let image: Data
   
-  init(query: String, image: UIImage) {
+  init(query: String, image: Data) {
     self.query = query
     self.image = image
   }

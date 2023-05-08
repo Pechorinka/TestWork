@@ -8,56 +8,69 @@
 import Foundation
 import UIKit
 
-class FavoritesViewController: UIViewController {
-  
+class FavoritesTableViewController: UITableViewController {
   private var favorites: [Favorite] = []
   
-  private let tableView: UITableView = {
-    let tableView = UITableView()
-    tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-    tableView.translatesAutoresizingMaskIntoConstraints = false
-    return tableView
-  }()
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    loadData()
+  }
   
-    override func viewDidLoad() {
-      super.viewDidLoad()
-      view.backgroundColor = .white
-      title = "Favorites"
-      setupViews()
+  private func loadData() {
+    do {
+      let url = getFavoritesURL()
+      let data = try Data(contentsOf: url)
+      let favorites = try JSONDecoder().decode([Favorite].self, from: data)
+      self.favorites = favorites
+      tableView.reloadData()
+    } catch {
+      let message = "Failed to load favorites: \(error.localizedDescription)"
+      showAlert(withTitle: "Error", message: message)
     }
-    private func setupViews() {
-      view.addSubview(tableView)
-      
-      NSLayoutConstraint.activate([
-        tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-        tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-        tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-      ])
-      
-      tableView.delegate = self
-      tableView.dataSource = self
-    }
-
-}
-extension FavoritesViewController: UITableViewDelegate, UITableViewDataSource {
+  }
   
-  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     return favorites.count
   }
   
-  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    let cell = tableView.dequeueReusableCell(withIdentifier: "FavoriteCell", for: indexPath)
     let favorite = favorites[indexPath.row]
     cell.textLabel?.text = favorite.query
-    cell.imageView?.image = favorite.image
+ //   cell.imageView?.image = UIImage(data: favorite.image)
     return cell
   }
   
-  func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+  override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {
       favorites.remove(at: indexPath.row)
-      tableView.deleteRows(at: [indexPath], with: .fade)
+        do {
+          let encoder = JSONEncoder()
+          encoder.outputFormatting = .prettyPrinted
+          
+          let jsonData = try encoder.encode(favorites)
+          let url = getFavoritesURL()
+          try jsonData.write(to: url)
+          
+          tableView.deleteRows(at: [indexPath], with: .fade)
+        } catch {
+          let message = "Failed to delete favorite: \(error.localizedDescription)"
+          showAlert(withTitle: "Error", message: message)
+        }
+      }
+    }
+    
+    private func showAlert(withTitle title: String, message: String) {
+      let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+      alert.addAction(okAction)
+      present(alert, animated: true, completion: nil)
+    }
+    
+    private func getFavoritesURL() -> URL {
+      let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+      let favoritesURL = documentsDirectory.appendingPathComponent("favorites.json")
+      return favoritesURL
     }
   }
-}
+
