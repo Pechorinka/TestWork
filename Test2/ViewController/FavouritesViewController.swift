@@ -13,10 +13,11 @@ class FavoritesTableViewController: UITableViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
+    tableView.register(FavoriteCell.self, forCellReuseIdentifier: "FavoriteCell")
     loadData()
   }
   
-  private func loadData() {
+  public func loadData() {
     do {
       let url = getFavoritesURL()
       let data = try Data(contentsOf: url)
@@ -24,7 +25,7 @@ class FavoritesTableViewController: UITableViewController {
       self.favorites = favorites
       tableView.reloadData()
     } catch {
-      let message = "Failed to load favorites: \(error.localizedDescription)"
+      let message = "Не удалось загрузить избранное: \(error.localizedDescription)"
       showAlert(withTitle: "Error", message: message)
     }
   }
@@ -37,7 +38,7 @@ class FavoritesTableViewController: UITableViewController {
     let cell = tableView.dequeueReusableCell(withIdentifier: "FavoriteCell", for: indexPath)
     let favorite = favorites[indexPath.row]
     cell.textLabel?.text = favorite.query
- //   cell.imageView?.image = UIImage(data: favorite.image)
+    cell.imageView?.image = UIImage(data: favorite.image)
     return cell
   }
   
@@ -66,11 +67,15 @@ class FavoritesTableViewController: UITableViewController {
       alert.addAction(okAction)
       present(alert, animated: true, completion: nil)
     }
-    
+
     private func getFavoritesURL() -> URL {
-      let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-      let favoritesURL = documentsDirectory.appendingPathComponent("favorites.json")
-      return favoritesURL
+        guard let resourceURL = Bundle.main.resourceURL else {
+            fatalError("Unable to get resource URL for the main bundle")
+        
+        }
+
+        let favoritesURL = resourceURL.appendingPathComponent("favorites.json")
+        return favoritesURL
     }
-  }
+}
 

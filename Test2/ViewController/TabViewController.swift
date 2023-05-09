@@ -24,7 +24,7 @@ class TabViewController: UIViewController {
         secondTab.title = "Избранное"
         secondTab.tabBarItem.image = UIImage(systemName: "star")
         secondTab.tabBarItem.selectedImage = UIImage(systemName: "star.fill")
-        secondTab.view.backgroundColor = UIColor(named: "Third")
+        secondTab.view.backgroundColor = UIColor(named: "First")
         
         let firstNavController = UINavigationController(rootViewController: firstTab)
         let secondNavController = UINavigationController(rootViewController: secondTab)
@@ -42,12 +42,18 @@ class TabViewController: UIViewController {
         ]
         let attributes2: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 18),
-            .foregroundColor: UIColor.gray
+            .foregroundColor: UIColor.black
         ]
 
 
         UITabBarItem.appearance().setTitleTextAttributes(attributes1, for: .selected)
-        UITabBarItem.appearance().setTitleTextAttributes(attributes2, for: .disabled)
+        UITabBarItem.appearance().setTitleTextAttributes(attributes2, for: .normal)
+        
+        firstTab.updates = {
+            [weak self] in
+            guard self != nil else { return }
+            secondTab.loadData()
+        }
     }
 }
 

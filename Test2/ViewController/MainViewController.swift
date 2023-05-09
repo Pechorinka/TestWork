@@ -8,11 +8,11 @@
 import UIKit
 
 class MainViewController: UIViewController {
-    
     let queryTextField = UITextField()
     let imageView = UIImageView()
     let generateButton = UIButton()
     let favButton = UIButton()
+    var updates: (() -> Void)?
     
     
     override func viewDidLoad() {
@@ -60,18 +60,18 @@ class MainViewController: UIViewController {
             imageView.topAnchor.constraint(equalTo: queryTextField.bottomAnchor, constant: 20),
             imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            imageView.bottomAnchor.constraint(equalTo: favButton.topAnchor, constant: -20),
+            imageView.bottomAnchor.constraint(equalTo: generateButton.topAnchor, constant: -20),
             
             
-            favButton.bottomAnchor.constraint(equalTo: generateButton.topAnchor, constant: -20),
-            favButton.widthAnchor.constraint(equalToConstant: 300),
-            favButton.heightAnchor.constraint(equalToConstant: 30),
-            favButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            generateButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
+            generateButton.bottomAnchor.constraint(equalTo: favButton.topAnchor, constant: -20),
             generateButton.widthAnchor.constraint(equalToConstant: 300),
             generateButton.heightAnchor.constraint(equalToConstant: 30),
-            generateButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            generateButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            favButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
+            favButton.widthAnchor.constraint(equalToConstant: 300),
+            favButton.heightAnchor.constraint(equalToConstant: 30),
+            favButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
     
@@ -105,9 +105,11 @@ class MainViewController: UIViewController {
         
         do {
           let data = try Data(contentsOf: url)
-          var favorites = try JSONDecoder().decode([Favorite].self, from: data)
-          
-          if favorites.count >= 5 {
+
+            do {
+                var favorites = try JSONDecoder().decode([Favorite].self, from: data)
+
+            if favorites.count >= Constants.maxFav {
             favorites.removeFirst()
           }
           
@@ -120,10 +122,16 @@ class MainViewController: UIViewController {
           let jsonData = try encoder.encode(favorites)
           try jsonData.write(to: url)
           
-          showAlert(withTitle: "Success", message: "Image added to favorites")
+          showAlert(withTitle: "Успех", message: "Картинка добавлена в избранное")
+                self.updates?()
+                
         } catch {
-          let message = "Failed to add image to favorites: \(error.localizedDescription)"
+          let message = "Не удалось добавить картинку в избранное: \(error.localizedDescription)"
           showAlert(withTitle: "Error", message: message)
+            print(String(describing: error))
+        }
+        } catch {
+            print("Error decoding favorites: \(error.localizedDescription)")
         }
       }
 
@@ -136,12 +144,11 @@ class MainViewController: UIViewController {
     }
     
     private func getFavoritesURL() -> URL {
-      let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        
-      let favoritesURL = documentsDirectory.appendingPathComponent("favorites.json")
-        print(documentsDirectory.path)
-
-      return favoritesURL
+        guard let resourceURL = Bundle.main.resourceURL else {
+            fatalError("Unable to get resource URL for the main bundle")
+        }
+        let favoritesURL = resourceURL.appendingPathComponent("favorites.json")
+        return favoritesURL
     }
     
 }
