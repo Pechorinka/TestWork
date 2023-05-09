@@ -30,7 +30,7 @@ class FavoriteCell: UITableViewCell {
         contentView.addSubview(favoriteImageView)
         
         NSLayoutConstraint.activate([
-            contentView.heightAnchor.constraint(equalToConstant: 100),
+          //  contentView.heightAnchor.constraint(equalToConstant: 100),
             queryLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             queryLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             queryLabel.trailingAnchor.constraint(equalTo: favoriteImageView.leadingAnchor, constant: -16),
@@ -39,6 +39,7 @@ class FavoriteCell: UITableViewCell {
             favoriteImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             favoriteImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             favoriteImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+      //      favoriteImageView.heightAnchor.constraint(equalToConstant: 100),
             favoriteImageView.widthAnchor.constraint(equalToConstant: 80)
         ])
     }

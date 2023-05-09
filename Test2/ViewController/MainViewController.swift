@@ -120,7 +120,11 @@ class MainViewController: UIViewController {
           encoder.outputFormatting = .prettyPrinted
           
           let jsonData = try encoder.encode(favorites)
-          try jsonData.write(to: url)
+                do { try jsonData.write(to: url)} catch {
+                    let message = "Не получилось записать в файл: \(error.localizedDescription)"
+                    showAlert(withTitle: "Error", message: message)
+                }
+        
           
           showAlert(withTitle: "Успех", message: "Картинка добавлена в избранное")
                 self.updates?()
@@ -148,6 +152,7 @@ class MainViewController: UIViewController {
             fatalError("Unable to get resource URL for the main bundle")
         }
         let favoritesURL = resourceURL.appendingPathComponent("favorites.json")
+        print("Это \(favoritesURL)")
         return favoritesURL
     }
     
