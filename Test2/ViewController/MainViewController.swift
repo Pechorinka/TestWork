@@ -76,19 +76,47 @@ class MainViewController: UIViewController {
     }
     
     @objc func generateButtonTapped() {
+        let url = getFavoritesURL()
+        var tag = false
+        
         guard let query = queryTextField.text, !query.isEmpty else {
             showAlert(withTitle: "Error", message: "Please enter a query")
             return
         }
         
-        ImageService.shared.getImage(forQuery: query) { [weak self] (result) in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let image):
-                    self?.imageView.image = image
-                    self?.imageView.isHidden = false
-                case .failure(let error):
-                    self?.showAlert(withTitle: "Error", message: error.localizedDescription)
+        do {
+            let data = try Data(contentsOf: url)
+            
+            do {
+                let favorites = try JSONDecoder().decode([Favorite].self, from: data)
+
+                if favorites.count > 0 {
+                    for i in 0...favorites.count-1 {
+                        if favorites[i].query == query {
+                            showAlert(withTitle: "Ошибка", message: "Такая картинка уже была сгенерирована и находится в избранном")
+                            tag = true
+                        }
+                    }
+                }
+            } catch {
+                let message = "Нет доступа к избранному: \(error.localizedDescription)"
+                showAlert(withTitle: "Ошибка", message: message)
+                  print(String(describing: error))
+              }
+        } catch {
+            print("Невозможно декодировать Избранное: \(error.localizedDescription)")
+        }
+        
+        if tag == false {
+            ImageService.shared.getImage(forQuery: query) { [weak self] (result) in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let image):
+                        self?.imageView.image = image
+                        self?.imageView.isHidden = false
+                    case .failure(let error):
+                        self?.showAlert(withTitle: "Error", message: error.localizedDescription)
+                    }
                 }
             }
         }
@@ -102,6 +130,7 @@ class MainViewController: UIViewController {
         
         let imageData = image.pngData()
         let url = getFavoritesURL()
+        print(url)
         
         do {
           let data = try Data(contentsOf: url)
@@ -131,7 +160,7 @@ class MainViewController: UIViewController {
                 
         } catch {
           let message = "Не удалось добавить картинку в избранное: \(error.localizedDescription)"
-          showAlert(withTitle: "Error", message: message)
+          showAlert(withTitle: "Ошибка", message: message)
             print(String(describing: error))
         }
         } catch {
@@ -148,11 +177,10 @@ class MainViewController: UIViewController {
     }
     
     private func getFavoritesURL() -> URL {
-        guard let resourceURL = Bundle.main.resourceURL else {
-            fatalError("Unable to get resource URL for the main bundle")
-        }
+     //   guard let resourceURL = Bundle.main.resourceURL
+        let resourceURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+
         let favoritesURL = resourceURL.appendingPathComponent("favorites.json")
-        print("Это \(favoritesURL)")
         return favoritesURL
     }
     

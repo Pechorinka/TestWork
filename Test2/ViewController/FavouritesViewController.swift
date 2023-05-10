@@ -41,6 +41,9 @@ class FavoritesTableViewController: UITableViewController {
     cell.imageView?.image = UIImage(data: favorite.image)
     return cell
   }
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 100
+    }
   
   override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {
@@ -69,10 +72,14 @@ class FavoritesTableViewController: UITableViewController {
     }
 
     private func getFavoritesURL() -> URL {
-        guard let resourceURL = Bundle.main.resourceURL else {
-            fatalError("Unable to get resource URL for the main bundle")
+     //   guard let resourceURL = Bundle.main.resourceURL else {
+     //       fatalError("Unable to get resource URL for the main bundle")
+            
+      //  }
         
-        }
+      //  let favoritesURL = resourceURL.appendingPathComponent("favorites.json")
+     //   return favoritesURL
+        let resourceURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
 
         let favoritesURL = resourceURL.appendingPathComponent("favorites.json")
         return favoritesURL
